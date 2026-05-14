@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #0a0a0f;
+            background-image: 
+                linear-gradient(rgba(173, 198, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(173, 198, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            color: #e1e2ec;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(77, 142, 255, 0.3);
+        }
+        .pulse-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(77, 142, 255, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(77, 142, 255, 0.7); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-variant": "#32353c",
+                "surface-container-low": "#191b23",
+                "on-error": "#690005",
+                "on-tertiary-fixed-variant": "#723600",
+                "on-surface-variant": "#c2c6d6",
+                "on-secondary-container": "#c4abff",
+                "primary": "#adc6ff",
+                "surface-container-lowest": "#0b0e15",
+                "on-primary-fixed": "#001a42",
+                "primary-fixed": "#d8e2ff",
+                "on-tertiary-fixed": "#311400",
+                "on-secondary-fixed-variant": "#5516be",
+                "error-container": "#93000a",
+                "inverse-on-surface": "#2e3038",
+                "secondary-fixed": "#e9ddff",
+                "on-surface": "#e1e2ec",
+                "on-background": "#e1e2ec",
+                "on-primary-fixed-variant": "#004395",
+                "secondary-fixed-dim": "#d0bcff",
+                "tertiary-fixed": "#ffdcc6",
+                "on-error-container": "#ffdad6",
+                "on-tertiary": "#502400",
+                "secondary": "#d0bcff",
+                "surface-container": "#1d2027",
+                "on-secondary": "#3c0091",
+                "tertiary-fixed-dim": "#ffb786",
+                "outline-variant": "#424754",
+                "on-tertiary-container": "#461f00",
+                "on-secondary-fixed": "#23005c",
+                "error": "#ffb4ab",
+                "tertiary": "#ffb786",
+                "surface": "#10131a",
+                "surface-dim": "#10131a",
+                "primary-fixed-dim": "#adc6ff",
+                "primary-container": "#4d8eff",
+                "tertiary-container": "#df7412",
+                "background": "#10131a",
+                "secondary-container": "#571bc1",
+                "outline": "#8c909f",
+                "inverse-surface": "#e1e2ec",
+                "on-primary-container": "#00285d",
+                "on-primary": "#002e6a",
+                "surface-container-high": "#272a31",
+                "surface-bright": "#363941",
+                "surface-tint": "#adc6ff",
+                "surface-container-highest": "#32353c",
+                "inverse-primary": "#005ac2"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "lg": "48px",
+                "container-max": "1200px",
+                "xs": "4px",
+                "md": "24px",
+                "sm": "12px",
+                "xl": "80px",
+                "base": "8px",
+                "gutter": "24px"
+            },
+            "fontFamily": {
+                "body-lg": ["Inter"],
+                "h1": ["Space Grotesk"],
+                "body-md": ["Inter"],
+                "h3": ["Space Grotesk"],
+                "label-caps": ["Inter"],
+                "h2": ["Space Grotesk"]
+            },
+            "fontSize": {
+                "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                "h1": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                "h3": ["24px", {"lineHeight": "1.3", "letterSpacing": "0", "fontWeight": "500"}],
+                "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                "h2": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="min-h-screen flex">
+<!-- SideNavBar Component -->
+<aside class="hidden md:flex flex-col h-screen w-64 border-r border-white/10 bg-[#0a0a0f]/90 backdrop-blur-[20px] fixed left-0 top-0 z-50 shadow-2xl py-8 space-y-6">
+<div class="px-6 mb-8">
+<h1 class="text-2xl font-black text-blue-500 font-h1">LegacyVault</h1>
+<p class="text-slate-500 font-label-caps mt-1">Digital Safe-Haven</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<!-- Active Tab: Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 text-blue-400 bg-blue-500/10 border-r-2 border-blue-500 font-['Space_Grotesk'] text-sm tracking-wide cursor-pointer transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/5 hover:text-slate-200 font-['Space_Grotesk'] text-sm tracking-wide cursor-pointer transition-all duration-300 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span>Asset Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/5 hover:text-slate-200 font-['Space_Grotesk'] text-sm tracking-wide cursor-pointer transition-all duration-300 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Trusted Contacts</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/5 hover:text-slate-200 font-['Space_Grotesk'] text-sm tracking-wide cursor-pointer transition-all duration-300 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Will Document</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/5 hover:text-slate-200 font-['Space_Grotesk'] text-sm tracking-wide cursor-pointer transition-all duration-300 active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="assignment_ind">assignment_ind</span>
+<span>Beneficiary Portal</span>
+</a>
+</nav>
+<div class="px-4 py-4 mt-auto space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/5 hover:text-slate-200 font-['Space_Grotesk'] text-sm tracking-wide transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+<span>Security</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/5 hover:text-slate-200 font-['Space_Grotesk'] text-sm tracking-wide transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Support</span>
+</a>
+<button class="w-full mt-4 bg-primary-container text-on-primary-container py-3 rounded-lg font-bold font-h3 text-sm pulse-glow transition-all active:scale-95">
+                Secure Vault
+            </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col">
+<!-- TopAppBar Component -->
+<header class="bg-[#0a0a0f]/80 backdrop-blur-[20px] fixed top-0 right-0 left-0 md:left-64 z-40 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-[1200px] mx-auto">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-blue-500 tracking-tighter font-h2">Dashboard</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" data-icon="search">search</span>
+<input class="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm font-body-md focus:border-blue-500 outline-none transition-all w-64" placeholder="Search Vault..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-blue-300 transition-colors duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<img alt="User avatar" class="w-8 h-8 rounded-full border border-blue-500/50" data-alt="A professional close-up headshot of a refined individual in a modern tech-focused environment. The lighting is low-key with soft blue edge-lighting reflecting off the person's face, matching a high-security vault aesthetic. The background is a blurred digital workspace with subtle neon blue highlights and glass textures. The person wears a minimalist dark turtleneck, suggesting intellectual security and premium professional status." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJpha3K5sJ7x3B_FYDlhfVIMIYaKoADWtJjuccmIRW83IWkGit--gW2rGAtkWZxRz1IiEP7dqrQmeyPNtqm1QX4j0jc4n66Vvm5nmhwAt___uIxXDr0QqwbyPUB32gR-c0iRYms5GNQBum4ihhR5_3YsH_tt4mqb8PCIYl8NlmKDjH_6as0TBKboTjsMyH31e3-UmtumX23s2AwScnnNs2l7y04jorZxNfo1vw05BOI9bIbGxxfWxWGdrspLDXr8vT1FQOgLDfO4E"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Canvas Content -->
+<div class="mt-24 px-6 py-8 max-w-[1200px] mx-auto w-full space-y-8 pb-12">
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Main Status & Timer (Lg Area) -->
+<div class="md:col-span-8 glass-card rounded-xl p-md flex flex-col items-center justify-center text-center space-y-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-green-400 glow-blue animate-pulse"></div>
+<span class="text-label-caps text-green-400">Vault Secure</span>
+</div>
+</div>
+<div class="space-y-2">
+<h3 class="text-label-caps text-slate-400 uppercase tracking-widest font-bold">Countdown to release protocol</h3>
+<h2 class="text-[48px] md:text-[64px] font-h1 font-black text-on-surface tracking-tighter glow-blue">
+                            05 <span class="text-blue-500">Days</span> 14:22:01
+                        </h2>
+</div>
+<button class="bg-primary-container hover:bg-primary-container/90 text-on-primary-container px-12 py-5 rounded-xl font-h2 text-xl font-bold pulse-glow transition-all transform active:scale-95 flex items-center gap-4">
+<span class="material-symbols-outlined" data-icon="fingerprint" style="font-variation-settings: 'FILL' 1;">fingerprint</span>
+                        I'm Alive — Check In
+                    </button>
+<div class="flex gap-8 pt-4">
+<div class="text-left">
+<p class="text-label-caps text-slate-500">Last Verified</p>
+<p class="font-h3 text-lg text-on-surface">2 days ago</p>
+</div>
+<div class="w-[1px] bg-white/10"></div>
+<div class="text-left">
+<p class="text-label-caps text-slate-500">Active Assets</p>
+<p class="font-h3 text-lg text-on-surface">12 Assets</p>
+</div>
+</div>
+</div>
+<!-- Trusted Contacts Section (Side Panel) -->
+<div class="md:col-span-4 glass-card rounded-xl p-md flex flex-col space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="font-h3 text-xl text-on-surface">Trusted Contacts</h3>
+<span class="material-symbols-outlined text-blue-500 cursor-pointer" data-icon="add_circle">add_circle</span>
+</div>
+<div class="space-y-4">
+<!-- Contact 1 -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all">
+<div class="flex items-center gap-3">
+<img alt="Sarah J." class="w-10 h-10 rounded-full border border-blue-500/30" data-alt="A portrait of a professional woman in her early 40s with a confident expression. The style is cinematic with cool blue ambient lighting and a deep dark background containing subtle digital network lines. The image should feel high-end, representing a trusted legal advisor or close family member in a digital security context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhGjaxeBEGkmVYRCwSvWFkvy1ANfDFUpiyjNFscPPOgbNNzMIqwY8cYtVR6y_8o6lWECnw_Bl3TEMf6LJg-in50E_d2FiEY4fcDEZ98x3QCrbmCZnuVQCWwCIM7RGtOM_mV5OLPfUjyRLUW_byFiA2oFacRN1inpx8enSGHHVYic_GzFSMR41g6psYYu6qOpbe4WC4wzVjER1FJs0xS_JQcxF4BmmzmmoXvlMO2eH8Uoahd4CQcsTpZuf7yn2zQM1ObiIIRE8xiv0"/>
+<div>
+<p class="font-body-md font-semibold text-on-surface">Sarah Jenkins</p>
+<p class="text-xs text-slate-500">Primary Beneficiary</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_#4ade80]"></div>
+</div>
+<!-- Contact 2 -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all">
+<div class="flex items-center gap-3">
+<img alt="Marcus T." class="w-10 h-10 rounded-full border border-blue-500/30" data-alt="A portrait of a middle-aged man with glasses, looking composed and reliable. Dark, moody lighting with an electric blue rim light highlighting his silhouette. The background is a sleek, glass-textured office interior at night. The mood is one of absolute trust and professional stewardship." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-ffYnsLT276Ql5kTOddDk1Ao73M3gzLXnhLR7wlLZGMrA0g2i1P7Md4VtRAbkBbUFV-RozUpC3N5Y1FbohM9EnauKaAnZ_i3UwPKpMkVutkEv6zCprP06TABej-65WCL0F3ujhNbtYBJ_GSHh1fy3udYDL4txFd9eptG2I-zMpLtE8MGxWdI5b7h1QVvD7CzxDRTNmQ5Z0ssm-gcdB752dg0hVjUQuNn8I2I3EP_RhpzYIdPEYzruVbzi1NXZPt8J6bE_OgfmXeg"/>
+<div>
+<p class="font-body-md font-semibold text-on-surface">Marcus Thorne</p>
+<p class="text-xs text-slate-500">Legal Executor</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24] animate-pulse"></div>
+</div>
+<!-- Contact 3 -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all">
+<div class="flex items-center gap-3">
+<img alt="Elena V." class="w-10 h-10 rounded-full border border-blue-500/30" data-alt="A portrait of a younger professional woman with a serious and attentive look. High-tech aesthetics with soft blue and deep violet color grading. She is set against a background of translucent glass panels and soft bokeh lights. The image suggests a modern, tech-savvy family member or secondary trustee." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMpt39UdRWQ9oDiB3JL6F3EgJQQt-im-uHIzwuW7IQ7xznqD-gTsXvYFN5S4ZtSmYQhzGlTfaBzNJZcXN9hLjNFe4cZRrsVPmqtSf9eCfhklEH_o14HkOAqFfUvq4cX0l3fro09_s_Pw9RlHx0Z6EzOxN1XjNxe80LX9yWXbBYMqGuN5hRnrVb1dbKRGJAWOy0JxBRn8B-cSPq_EFZaPdP51VvtSzPTl-z5Pt5RcX3luibEcGAtywTa__hJvMp_RO4MZfL6Mifdrg"/>
+<div>
+<p class="font-body-md font-semibold text-on-surface">Elena Vance</p>
+<p class="text-xs text-slate-500">Secondary Contact</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-slate-600"></div>
+</div>
+</div>
+<button class="w-full py-3 rounded-lg border border-white/10 text-slate-400 hover:bg-white/5 hover:text-on-surface transition-all text-sm font-label-caps">
+                        Manage All Contacts
+                    </button>
+</div>
+<!-- Recent Activity Bento Item -->
+<div class="md:col-span-4 glass-card rounded-xl p-md space-y-4">
+<h3 class="font-h3 text-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500" data-icon="history">history</span>
+                        Recent Activity
+                    </h3>
+<div class="space-y-4">
+<div class="relative pl-6 border-l border-white/10 space-y-1">
+<div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-blue-500"></div>
+<p class="text-sm font-body-md text-on-surface">Vault Entry Logged</p>
+<p class="text-xs text-slate-500">Today, 09:42 AM</p>
+</div>
+<div class="relative pl-6 border-l border-white/10 space-y-1">
+<div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-600"></div>
+<p class="text-sm font-body-md text-on-surface">Asset "Crypto Cold Wallet" Updated</p>
+<p class="text-xs text-slate-500">Yesterday, 11:20 PM</p>
+</div>
+<div class="relative pl-6 border-l border-white/10 space-y-1">
+<div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-600"></div>
+<p class="text-sm font-body-md text-on-surface">Secondary Check-in Successful</p>
+<p class="text-xs text-slate-500">2 days ago</p>
+</div>
+</div>
+</div>
+<!-- Security Strength Bento Item -->
+<div class="md:col-span-4 glass-card rounded-xl p-md space-y-6 flex flex-col justify-center items-center">
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-white/5" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-blue-500" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="40" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-2xl font-black font-h1">88%</span>
+<span class="text-[10px] font-label-caps text-slate-500 uppercase">Security</span>
+</div>
+</div>
+<div class="text-center">
+<h4 class="font-h3 text-base text-on-surface">High Protocol Grade</h4>
+<p class="text-xs text-slate-500 mt-1">Add 2FA via Bio-Link to reach 100%</p>
+</div>
+</div>
+<!-- Asset Summary Bento Item -->
+<div class="md:col-span-4 glass-card rounded-xl p-md space-y-4">
+<h3 class="font-h3 text-lg text-on-surface">Asset Allocation</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-400">Digital Assets</span>
+<span class="font-semibold">6</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-blue-500 w-[70%]"></div>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-400">Legal Documents</span>
+<span class="font-semibold">4</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-purple-500 w-[40%]"></div>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-400">Physical Locations</span>
+<span class="font-semibold">2</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 w-[20%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Warning/Alert Strip -->
+<div class="glass-card border-amber-500/20 bg-amber-500/5 rounded-xl p-4 flex items-center gap-4">
+<span class="material-symbols-outlined text-amber-500" data-icon="warning">warning</span>
+<p class="text-sm font-body-md text-on-surface">
+<span class="font-bold text-amber-400">Security Notice:</span> Your trusted contact Marcus Thorne hasn't verified his identity in 30 days. We recommend a status ping.
+                </p>
+<button class="ml-auto text-amber-400 hover:text-amber-300 font-label-caps text-xs">Verify Now</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[#0a0a0f]/90 backdrop-blur-[20px] flex justify-around items-center py-4 border-t border-white/10 z-50">
+<a class="flex flex-col items-center gap-1 text-blue-400" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-label-caps">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span class="text-[10px] font-label-caps">Vault</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-[10px] font-label-caps">Contacts</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-label-caps">Settings</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LegacyVault | Beneficiary Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .journey-path {
+            background: linear-gradient(to bottom, #ccead6 0%, #b0cdbb 100%);
+        }
+        body {
+            background-color: #f8f9ff;
+            background-image: radial-gradient(circle at 100% 0%, rgba(176, 205, 187, 0.1) 0%, transparent 40%),
+                              radial-gradient(circle at 0% 100%, rgba(204, 234, 214, 0.1) 0%, transparent 40%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#2d4739",
+                        "surface-container": "#e5eeff",
+                        "surface": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "primary-fixed-dim": "#b0cdbb",
+                        "on-surface": "#121c28",
+                        "tertiary-fixed": "#e3e2e2",
+                        "secondary-container": "#dce2f3",
+                        "on-primary-fixed-variant": "#324c3e",
+                        "secondary-fixed-dim": "#c0c7d6",
+                        "on-background": "#121c28",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#98b5a3",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424844",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "secondary-fixed": "#dce2f3",
+                        "inverse-surface": "#27313e",
+                        "surface-container-low": "#eef4ff",
+                        "primary-fixed": "#ccead6",
+                        "secondary": "#585f6c",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "inverse-primary": "#b0cdbb",
+                        "surface-dim": "#d1dbec",
+                        "tertiary-container": "#414242",
+                        "surface-tint": "#496455",
+                        "surface-container-high": "#dfe9fa",
+                        "on-secondary-container": "#5e6572",
+                        "on-primary-fixed": "#062014",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#c2c8c2",
+                        "surface-bright": "#f8f9ff",
+                        "primary": "#173124",
+                        "tertiary": "#2b2c2c",
+                        "on-tertiary-container": "#aeaeae",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#404754",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#151c27",
+                        "surface-variant": "#d9e3f4",
+                        "surface-container-highest": "#d9e3f4",
+                        "outline": "#727973"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "12px",
+                        "md": "24px",
+                        "xl": "80px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "lg": "48px",
+                        "container-max": "1120px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "h2": ["Newsreader"],
+                        "h3": ["Newsreader"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "h1": ["Newsreader"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "h2": ["32px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "h3": ["24px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="text-on-surface font-body-md overflow-x-hidden">
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant shadow-sm flex flex-col py-8 space-y-6 z-50 hidden md:flex">
+<div class="px-6 mb-8">
+<h1 class="text-3xl font-h1 text-primary tracking-tight">LegacyVault</h1>
+<p class="text-xs text-on-surface-variant font-label-sm mt-1 uppercase">A Gentle Stewardship</p>
+</div>
+<nav class="flex-1 space-y-1 px-3">
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Overview</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-body-md">The Vault</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">people</span>
+<span class="font-body-md">Trusted Circles</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-body-md">Wishes &amp; Wills</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-primary bg-primary-fixed border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-body-md font-medium">Beneficiary Portal</span>
+</a>
+</nav>
+<div class="px-3 border-t border-outline-variant pt-6 space-y-1">
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="font-body-md">Security</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">volunteer_activism</span>
+<span class="font-body-md">Support</span>
+</a>
+</div>
+</aside>
+<header class="md:ml-64 bg-surface/80 backdrop-blur-md border-b border-outline-variant sticky top-0 z-40">
+<div class="max-w-[1120px] mx-auto px-6 py-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center border border-primary/10">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<h2 class="font-h3 text-primary">Your journey is being guided</h2>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">settings</span>
+<img alt="User avatar" class="w-8 h-8 rounded-full border-2 border-primary-fixed" data-alt="A warm, reassuring professional portrait of a person with a kind expression. Soft, natural lighting. The background is a blurred library or quiet office setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD70Ap5Kc20XQbYXNklKBAoTTHrXYDuoR-TyS_KKmYujrkA72RoJxkKn2KnbGRuCtcU9a097lPdtbXnrnBE01dzATWI_Py4LrPcewWRYaF6AM_zyORm6tDX-k7wBNUbLpbNaSrvQSlYUliGl5Kp4LuZniYtBSpERf_tSdl7x_38AjWFoN-_-AC2ff6-1AfiUzYJCAtTHLpsEalFykHmPAHa--tX1jGb-DYHgugWP5Y-GUBf9UWaXtnURIr92gp3-mWNrwRX6anY-s8"/>
+</div>
+</div>
+</header>
+<main class="md:ml-64 p-6 md:p-12 max-w-[1120px] mx-auto">
+<div class="mb-12">
+<h1 class="font-h1 text-on-surface mb-4">A Step Toward Stewardship</h1>
+<p class="text-on-surface-variant font-body-lg max-w-2xl italic">
+                We are here to help you through this transition. LegacyVault is carefully preparing and sharing the gifts left for you, ensuring every step is clear, supported, and secure.
+            </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<section class="lg:col-span-4 relative">
+<div class="absolute left-[27px] top-8 bottom-8 w-[2px] journey-path"></div>
+<div class="space-y-12">
+<div class="relative flex gap-6">
+<div class="z-10 w-14 h-14 rounded-full bg-primary-fixed text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-1 pt-1">
+<span class="text-primary font-label-sm uppercase tracking-wider">Completed</span>
+<h3 class="font-h3 text-on-surface">Beginning the Transition</h3>
+<p class="text-sm text-on-surface-variant mt-1">Identity verification and initial access were established.</p>
+</div>
+</div>
+<div class="relative flex gap-6">
+<div class="z-10 w-14 h-14 rounded-full bg-primary-fixed text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-1 pt-1">
+<span class="text-primary font-label-sm uppercase tracking-wider">Completed</span>
+<h3 class="font-h3 text-on-surface">Shared Resources</h3>
+<p class="text-sm text-on-surface-variant mt-1">Financial accounts and essential records are now ready for you.</p>
+</div>
+</div>
+<div class="relative flex gap-6">
+<div class="z-10 w-14 h-14 rounded-full bg-surface-container border-2 border-primary-fixed text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div class="flex-1 pt-1">
+<span class="text-on-surface-variant font-label-sm uppercase tracking-wider">Next Step</span>
+<h3 class="font-h3 text-on-surface">Final Stewardship</h3>
+<p class="text-sm text-on-surface-variant mt-1">Titles, deeds, and legal legacy documents are being finalized.</p>
+</div>
+</div>
+</div>
+</section>
+<section class="lg:col-span-8 space-y-8">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm">
+<div class="flex justify-between items-start mb-8">
+<h2 class="font-h2 text-on-surface">Gifts Prepared for You</h2>
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                            SECURELY PREPARED
+                        </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-6 hover:bg-surface-container transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 rounded-full bg-primary-fixed text-primary">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<button class="text-primary text-xs font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform uppercase tracking-wider">
+                                    OPEN VAULT <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<h4 class="font-h3 text-on-surface text-lg">Main Financial Legacy</h4>
+<p class="text-sm text-on-surface-variant mb-4">A collection of secure holdings and accounts.</p>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-6 hover:bg-surface-container transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 rounded-full bg-primary-fixed text-primary">
+<span class="material-symbols-outlined">history_edu</span>
+</div>
+<button class="text-primary text-xs font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform uppercase tracking-wider">
+                                    VIEW RECORDS <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<h4 class="font-h3 text-on-surface text-lg">Personal Archives</h4>
+<p class="text-sm text-on-surface-variant mb-4">Memories, keys, and important life documents.</p>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-6 hover:bg-surface-container transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 rounded-full bg-primary-fixed text-primary">
+<span class="material-symbols-outlined">token</span>
+</div>
+<button class="text-primary text-xs font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform uppercase tracking-wider">
+                                    ACCESS PORTAL <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<h4 class="font-h3 text-on-surface text-lg">Digital Portfolio</h4>
+<p class="text-sm text-on-surface-variant mb-4">Secured digital assets and hardware connections.</p>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-dashed border-outline-variant rounded-xl p-6 flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-on-surface-variant mb-2">hourglass_empty</span>
+<h4 class="font-body-md text-on-surface-variant font-medium">In Preparation</h4>
+<p class="text-xs text-on-surface-variant italic">Next release expected in 4 days</p>
+</div>
+</div>
+</div>
+<div class="bg-primary-fixed/30 border border-primary-fixed rounded-xl p-8">
+<div class="flex items-start gap-6">
+<div class="p-4 rounded-full bg-white border border-primary-fixed text-primary">
+<span class="material-symbols-outlined text-3xl">lightbulb_circle</span>
+</div>
+<div class="flex-1">
+<h3 class="font-h3 text-on-surface mb-3">You aren't alone in this.</h3>
+<p class="text-on-surface-variant leading-relaxed mb-6 font-body-md">
+                                Every step of this process is paired with supportive guidance. If you feel overwhelmed, your personal concierge and our legal advisors are ready to walk with you through every detail.
+                            </p>
+<div class="flex flex-wrap gap-4">
+<button class="px-8 py-3 rounded-full bg-primary text-on-primary font-medium hover:bg-primary-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">forum</span>
+                                    Talk with our team
+                                </button>
+<button class="px-8 py-3 rounded-full border border-primary/20 bg-white hover:bg-surface-container transition-all text-primary font-medium">
+                                    Read the Simple Guide
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<section class="mt-12">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="relative h-56 rounded-xl overflow-hidden shadow-sm group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A tranquil, sun-drenched architectural space with soft cream walls and a single olive branch in a vase. The mood is peaceful and reverent." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmD4OzQAbDjqpQKm8sIzNKETnzxCLTcnGh8RDc8TurIrbyJB5aho9BRLFHlEq5fbtSeD_Y6lsfdqSeLfAvcOz0Mi-VkxHtQggn1GTe43nqld1uR1RlMBc3D5fCJTLKDT2e2kA4GYPJffI17JclcTZ0Cd8nNKbLDk-_d_z3nn8BHpBXTWVMfx1sbnxiQup-Zb9_otm5xtRdkNYWehn-oxRfPiiKKqBTyi6fjrTlgBv7jSiXwmZc90dgMVwBBsQtvKcN32zDBXmh1F4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent p-6 flex flex-col justify-end">
+<h4 class="text-white font-h3 text-lg">Trust Verified</h4>
+<p class="text-xs text-white/90">Validated by the Global Trust Alliance</p>
+</div>
+</div>
+<div class="relative h-56 rounded-xl overflow-hidden shadow-sm group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Close-up of high-end recycled paper texture with subtle gold leaf accents, suggesting precious documents and value." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpiHy4PBjjjItDhcmCbIhTslRX_ionr3lbKx7J-7xeuZTe_KDuIg1rzMjpgYje1NrtOKYxTFOqCEWa0NH3BioXhRaBS3rUnTA-mIUkq65CTkBnt7oIUks_bKxZOtBg5lfEPUdgz16tN5pVb_Jvk9R1lfCQIEt_0c1cnukYACP7R3nwb8hJxKUtWv7CeVvNb3Pa4MoXYdMtPC1JfAqVi2EHBmuFWu_VnUuP5UVAAUa6fsvL5oOgewhqhdmVzzDPrCwbwrLC2rQHRfs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent p-6 flex flex-col justify-end">
+<h4 class="text-white font-h3 text-lg">Encrypted with Care</h4>
+<p class="text-xs text-white/90">Deep protection for every digital gift</p>
+</div>
+</div>
+<div class="relative h-56 rounded-xl overflow-hidden shadow-sm group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A soft-focus aerial view of a calm, interconnected village or landscape, symbolizing a community and network of care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA55PgCW0H6KtLKrb49JZRCQryR5hcLyLTAjE2n24eEp9BQII79m2N4t2OrmuGootVoWc1lzWnxPfdhBoF4NS1QleEci3_2aUc4JILcBqe8pkYStwN1AmagmAgTEZgk_cVJF31HMDNzsK_TKbHlDtpGOKo-dYtkr_IeEHlmshow-ThcZmKq1_mNSjqnIeWBvsMurZ6f48xrzHd3riyKwl4WVG1ay2aZCoZNnwtxd6amvr_WJfrD_hP0QTrvrvoXPLM09ZkTgiCKe-Y"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent p-6 flex flex-col justify-end">
+<h4 class="text-white font-h3 text-lg">Always Accessible</h4>
+<p class="text-xs text-white/90">A permanent home for your legacy</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-md md:hidden flex justify-around items-center px-4 z-50 border-t border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant">dashboard</span>
+<span class="material-symbols-outlined text-on-surface-variant">auto_stories</span>
+<div class="bg-primary-fixed p-3 rounded-full">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">history_edu</span>
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</div>
+</body></html>
