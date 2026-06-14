@@ -4,7 +4,7 @@ VAULTIS is a Web3 inheritance platform for encrypted digital vaulting, beneficia
 
 - `frontend/`: React + Vite client for the vault console
 - `backend/`: Express API with MongoDB persistence, AES-256-GCM encryption, workflow logging, and security monitoring
-- `blockchain/`: Hardhat contracts for token rewards, will proofs, and inheritance triggering
+- `frontend/src/contracts/`: deployed LVT contract ABI, Solidity backup, and Remix redeploy guide
 
 ## Local Setup
 
@@ -44,24 +44,9 @@ Frontend runs on `http://localhost:5173` by default. Backend runs on `http://loc
 
 ## Contracts
 
-- `VaultisToken.sol`: rewards + staking token
-- `WillRegistry.sol`: immutable proof registry with pause support
-- `InheritanceTrigger.sol`: trusted-contact confirmations, delayed releases, and emergency pause support
-
-Compile and test:
-
-```bash
-npm run compile
-npm run test:contracts
-```
-
-Deploy a network manifest:
-
-```bash
-npm run deploy:sepolia
-```
-
-The deployment script writes a manifest under `blockchain/deployments/`.
+- `frontend/src/contracts/LVTToken.json`: live deployed ABI used by the app
+- `frontend/src/contracts/LVTToken.sol`: Solidity source backup for Remix
+- `frontend/src/contracts/REMIX_DEPLOY_GUIDE.txt`: redeploy checklist for Sepolia
 
 ## Vercel Notes
 

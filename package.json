@@ -3,14 +3,10 @@
   "version": "1.0.0",
   "description": "Decentralized Digital Inheritance and Dead Man's Switch System",
   "scripts": {
-    "setup": "npm install && cd backend && npm install && cd ../blockchain && npm install && cd ../frontend && npm install",
+    "setup": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "dev": "concurrently -n BACKEND,FRONTEND -c cyan,magenta \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
-    "client": "cd frontend && npm run dev",
-    "compile": "cd blockchain && npx hardhat compile",
-    "deploy:local": "cd blockchain && npx hardhat node",
-    "deploy:sepolia": "cd blockchain && npx hardhat run scripts/deploy.js --network sepolia",
-    "test:contracts": "cd blockchain && npx hardhat test"
+    "client": "cd frontend && npm run dev"
   },
   "devDependencies": {
     "concurrently": "^8.2.0"
