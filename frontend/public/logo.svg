@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M256 48L108 114V258C108 362.5 175.7 432.1 256 484C336.3 432.1 404 362.5 404 258V114L256 48Z"
+    stroke="#4d8eff"
+    stroke-width="28"
+    stroke-linejoin="round"
+  />
+  <path d="M256 126L187 244L256 212V126Z" fill="#1a3a6e" stroke="#4d8eff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 126L325 244L256 212V126Z" fill="#1a3a6e" stroke="#4d8eff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 228L187 259L256 302V228Z" fill="#1a3a6e" stroke="#4d8eff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 228L325 259L256 302V228Z" fill="#1a3a6e" stroke="#4d8eff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 318L198 279L256 388V318Z" fill="#1a3a6e" stroke="#4d8eff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 318L314 279L256 388V318Z" fill="#1a3a6e" stroke="#4d8eff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 129V326" stroke="#4d8eff" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="256" cy="170" r="22" fill="#0d0f14" stroke="#4d8eff" stroke-width="10"/>
+</svg>
