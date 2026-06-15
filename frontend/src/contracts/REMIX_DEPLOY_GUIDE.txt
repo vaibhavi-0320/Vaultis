@@ -1,0 +1,45 @@
+VAULTIS - Smart Contract Deployment Guide
+==========================================
+
+Contract: LVTToken.sol (ERC-20 + Check-in Rewards)
+Deployed Network: Ethereum Sepolia Testnet
+Contract Address: 0x9BD654624D490DeBA2fEF53D959ab27e29373A77
+Verify on: https://sepolia.etherscan.io/address/0x9BD654624D490DeBA2fEF53D959ab27e29373A77
+
+HOW TO REDEPLOY USING REMIX IDE:
+==================================
+1. Open https://remix.ethereum.org
+2. Create new file: LVTToken.sol
+3. Paste contents from LVTToken.sol in this folder
+4. Go to Solidity Compiler tab
+5. Select compiler version: 0.8.20
+6. Enable optimization: 200 runs
+7. Click Compile LVTToken.sol
+8. Go to Deploy & Run Transactions tab
+9. Environment: Injected Provider - MetaMask
+10. Make sure MetaMask is on Sepolia network
+11. Select contract: LVTToken
+12. Click Deploy
+13. Approve transaction in MetaMask
+14. Copy the deployed contract address
+15. Update frontend/.env:
+    VITE_LVT_CONTRACT_ADDRESS=0xNewAddress
+16. Update backend/.env:
+    VAULTIS_TOKEN_ADDRESS=0xNewAddress
+17. Restart frontend and backend
+
+CONTRACT FUNCTIONS FOR DEMO:
+==============================
+checkInAndEarn()   - User calls this to earn LVT tokens
+balanceOf(address) - Read LVT balance of any address
+canUserCheckIn(address) - Returns true if cooldown is over
+getTimeUntilNextCheckIn(address) - Seconds until next check-in
+lastCheckIn(address) - Timestamp of last check-in
+
+TOKEN DETAILS:
+==============
+Name: Legacy Vault Token
+Symbol: LVT
+Decimals: 18
+Reward per check-in: 10 LVT
+Cooldown: 24 hours between check-ins
