@@ -6,7 +6,22 @@ Deployed Network: Ethereum Sepolia Testnet
 Contract Address: 0x9BD654624D490DeBA2fEF53D959ab27e29373A77
 Verify on: https://sepolia.etherscan.io/address/0x9BD654624D490DeBA2fEF53D959ab27e29373A77
 
-HOW TO REDEPLOY USING REMIX IDE:
+PREFERRED: HARDHAT DEPLOYMENT (see /blockchain)
+==================================================
+The blockchain/ folder is now a real Hardhat project. To deploy a fresh instance:
+  cd blockchain
+  npm install
+  cp .env.example .env   # fill in SEPOLIA_RPC_URL, DEPLOYER_PRIVATE_KEY, ETHERSCAN_API_KEY
+  npx hardhat compile
+  npx hardhat test
+  npx hardhat run scripts/deploy.js --network sepolia
+
+A successful run prints the new contract address and automatically rewrites
+frontend/src/contracts/LVTToken.json with the fresh ABI. You still need to
+manually update VAULTIS_TOKEN_ADDRESS (backend/.env) and
+VITE_LVT_CONTRACT_ADDRESS (frontend/.env) with the new address.
+
+FALLBACK: HOW TO REDEPLOY USING REMIX IDE:
 ==================================
 1. Open https://remix.ethereum.org
 2. Create new file: LVTToken.sol

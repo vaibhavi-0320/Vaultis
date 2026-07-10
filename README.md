@@ -46,7 +46,16 @@ Frontend runs on `http://localhost:5173` by default. Backend runs on `http://loc
 
 - `frontend/src/contracts/LVTToken.json`: live deployed ABI used by the app
 - `frontend/src/contracts/LVTToken.sol`: Solidity source backup for Remix
-- `frontend/src/contracts/REMIX_DEPLOY_GUIDE.txt`: redeploy checklist for Sepolia
+- `blockchain/`: the real Hardhat project for the LVT token — `npm install && npx hardhat compile && npx hardhat test` to build/test locally, `npx hardhat run scripts/deploy.js --network sepolia` to deploy a fresh instance with your own funded wallet (see `blockchain/.env.example`). A successful deploy run updates `frontend/src/contracts/LVTToken.json` automatically.
+- `frontend/src/contracts/REMIX_DEPLOY_GUIDE.txt`: legacy manual Remix redeploy steps, kept as a fallback if you'd rather not use Hardhat.
+
+## AWS S3 Document Storage (optional)
+
+By default, encrypted will/asset content is stored inline in MongoDB. To store it in S3 instead (only the AES-256-GCM ciphertext ever leaves the server — S3 never sees plaintext):
+
+1. Create an S3 bucket and an IAM user/role with `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` scoped to that bucket.
+2. In `backend/.env`, set `AWS_S3_ENABLED=true` and fill in `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_S3_BUCKET`.
+3. Restart the backend. New wills saved via `POST /api/will` will be written to S3; existing MongoDB-stored wills keep working unchanged (read path checks each document's `storageProvider`).
 
 ## Vercel Notes
 

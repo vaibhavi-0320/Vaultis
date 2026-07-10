@@ -8,7 +8,9 @@ const willDocumentSchema = new mongoose.Schema({
     unique: true,
     index: true
   },
-  encryptedContent: { type: String, required: true },
+  encryptedContent: { type: String, default: '' },
+  storageProvider: { type: String, enum: ['mongo', 's3'], default: 'mongo' },
+  s3Key: { type: String, default: '', trim: true },
   summary: { type: String, default: '', trim: true },
   sha256Hash: { type: String, required: true, trim: true, index: true },
   blockchainTxHash: { type: String, default: '', trim: true },

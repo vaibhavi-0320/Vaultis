@@ -7,6 +7,7 @@ const { encrypt, decrypt } = require('../services/encryptionService');
 const { registerWill } = require('../services/blockchainService');
 const { recordActivity } = require('../utils/activity');
 const { getWillDocument, saveWillDocument, updateUser } = require('../services/localStore');
+const s3Service = require('../services/s3Service');
 
 const router = express.Router();
 
@@ -21,11 +22,16 @@ router.get('/', protect, async (req, res) => {
       return res.json({ success: true, will: null });
     }
 
+    const plainWill = will.toObject ? will.toObject() : will;
+    const encryptedContent = plainWill.storageProvider === 's3'
+      ? await s3Service.getEncryptedBlob(plainWill.s3Key)
+      : plainWill.encryptedContent;
+
     res.json({
       success: true,
       will: {
-        ...(will.toObject ? will.toObject() : will),
-        content: decrypt(will.encryptedContent)
+        ...plainWill,
+        content: decrypt(encryptedContent)
       }
     });
   } catch (error) {
@@ -46,11 +52,22 @@ router.post('/', protect, async (req, res) => {
     let proof = { success: false, simulated: false, txHash: '' };
 
     const payload = {
-      encryptedContent,
       summary: String(summary).trim(),
       sha256Hash,
       proofStatus: 'draft'
     };
+
+    if (s3Service.isEnabled()) {
+      const s3Key = `wills/${req.user._id}.enc`;
+      await s3Service.uploadEncryptedBlob(s3Key, encryptedContent);
+      payload.storageProvider = 's3';
+      payload.s3Key = s3Key;
+      payload.encryptedContent = '';
+    } else {
+      payload.storageProvider = 'mongo';
+      payload.s3Key = '';
+      payload.encryptedContent = encryptedContent;
+    }
 
     if (registerOnChain) {
       proof = await registerWill(sha256Hash);
