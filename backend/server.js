@@ -67,8 +67,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4173',
   'http://127.0.0.1:5173',
-  process.env.FRONTEND_URL,
-  'https://vaultis.vercel.app'
+  process.env.FRONTEND_URL
 ].filter(Boolean);
 
 app.use(cors({
@@ -125,6 +124,7 @@ app.use('/api/vault', require('./routes/vault'));
 app.use('/api/will', require('./routes/will'));
 app.use('/api/security', require('./routes/security'));
 app.use('/api/overview', require('./routes/overview'));
+app.use('/api/cron', require('./routes/cron'));
 
 app.use((req, res) => {
   res.status(404).json({
@@ -149,13 +149,23 @@ async function startServer() {
   try {
     await connectDB();
     initBlockchain();
-    startEventListener();
+
+    // The event listener holds an open RPC filter subscription, which only makes
+    // sense on a long-lived process. On Vercel, each invocation is a fresh,
+    // short-lived function instance, so this would just leak filters and log
+    // "filter not found" errors on every cold start for no benefit — tx
+    // confirmation already happens synchronously via /api/checkin/save-tx.
+    if (!process.env.VERCEL) {
+      startEventListener();
+    }
   } catch (error) {
     console.error(`Startup failed: ${error.message}`);
     process.exit(1);
   }
 
-  // On Vercel, we export the app and don't bind to a port or run local cron jobs
+  // On Vercel, we export the app and don't bind to a port or run local cron jobs.
+  // The dead-man-switch job instead runs via GET /api/cron/run, triggered by
+  // Vercel Cron (see vercel.json) since node-cron can't persist in serverless.
   if (!process.env.VERCEL) {
     app.listen(PORT, () => {
       console.log(`Backend running on http://localhost:${PORT}`);
