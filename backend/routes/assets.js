@@ -17,6 +17,18 @@ const {
 
 const router = express.Router();
 
+const ASSET_UPDATE_FIELDS = [
+  'title', 'description', 'category', 'assetType', 'data',
+  'beneficiaryName', 'beneficiaryEmail', 'priority', 'tags', 'fileName', 'mimeType'
+];
+
+const pickAllowedFields = (body, fields) => fields.reduce((acc, field) => {
+  if (Object.prototype.hasOwnProperty.call(body, field)) {
+    acc[field] = body[field];
+  }
+  return acc;
+}, {});
+
 const ALLOWED_TYPES = new Set([
   'password', 'crypto_wallet', 'document', 'pdf', 'image', 'video',
   'social_account', 'bank_account', 'wallet_note', 'private_instruction', 'note', 'other'
@@ -312,7 +324,7 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Asset not found' });
     }
 
-    const updates = { ...req.body };
+    const updates = pickAllowedFields(req.body, ASSET_UPDATE_FIELDS);
 
     if (updates.assetType && !ALLOWED_TYPES.has(updates.assetType)) {
       return res.status(400).json({ success: false, message: 'Unsupported asset type' });
@@ -336,7 +348,7 @@ router.put('/:id', protect, async (req, res) => {
     updates.lastVerifiedAt = new Date();
 
     const updated = isDatabaseReady()
-      ? await Asset.findByIdAndUpdate(req.params.id, updates, { new: true })
+      ? await Asset.findOneAndUpdate({ _id: req.params.id, userId: req.user._id }, updates, { new: true })
       : await updateLocalAsset(req.user._id, req.params.id, updates);
 
     await recordActivity({

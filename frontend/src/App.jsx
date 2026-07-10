@@ -1,5 +1,6 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { setNavigate } from './lib/api'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppShell } from './components/AppShell'
 import { AuthPage } from './pages/AuthPage'
@@ -41,6 +42,11 @@ function ProtectedLayout({ children }) {
 
 export default function App() {
   const [booting, setBooting] = useState(() => !sessionStorage.getItem('vaultis_boot_complete'))
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setNavigate(navigate)
+  }, [navigate])
 
   useEffect(() => {
     if (!booting) {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, ExternalLink, LogOut, Wallet } from 'lucide-react'
 import { Modal } from './Modal'
-import { useWallet } from '../context/useWallet'
+import { useWallet } from '../contexts/useWallet'
 
 function InstallLink({ href, children }) {
   return (

@@ -1,10 +1,58 @@
 import { X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
 
 export function Modal({ open, title, children, onClose, width = '720px' }) {
+  const panelRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) {
+      return undefined
+    }
+
+    const panel = panelRef.current
+    const focusable = panel ? Array.from(panel.querySelectorAll(FOCUSABLE_SELECTOR)) : []
+    focusable[0]?.focus()
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.()
+        return
+      }
+
+      if (event.key !== 'Tab' || focusable.length === 0) {
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
   if (!open) return null
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-panel" style={{ maxWidth: width }} onClick={(event) => event.stopPropagation()}>
+      <div
+        className="modal-panel"
+        style={{ maxWidth: width }}
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        ref={panelRef}
+      >
         <div className="modal-header">
           <div>
             <h3>{title}</h3>

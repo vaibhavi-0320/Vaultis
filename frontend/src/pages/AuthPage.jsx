@@ -7,7 +7,7 @@ import { useToast } from '../contexts/ToastContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { VaultisBrand } from '../components/VaultisBrand'
 import { WalletConnectButton } from '../components/WalletConnectButton'
-import { useWallet } from '../context/useWallet'
+import { useWallet } from '../contexts/useWallet'
 
 function validate(mode, values) {
   const next = {}
@@ -16,7 +16,10 @@ function validate(mode, values) {
   }
   if (!/^\S+@\S+\.\S+$/.test(values.email)) next.email = 'Enter a valid email address.'
   if (mode === 'register') {
-    if ((values.password || '').length < 6) next.password = 'Use at least 6 characters.'
+    const password = values.password || ''
+    if (password.length < 12 || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(password)) {
+      next.password = 'Use at least 12 characters with uppercase, lowercase, a number, and a symbol (@$!%*?&).'
+    }
   } else if (!values.password) {
     next.password = 'Enter your password.'
   }
@@ -131,6 +134,7 @@ export function AuthPage({ mode: initialMode }) {
                 <input
                   value={name}
                   onChange={(event) => setName(event.target.value)}
+                  autoComplete="name"
                 />
                 {errors.name ? <small className="field-error">{errors.name}</small> : null}
               </label>
@@ -142,6 +146,7 @@ export function AuthPage({ mode: initialMode }) {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                autoComplete="email"
               />
               {errors.email ? <small className="field-error">{errors.email}</small> : null}
             </label>
@@ -153,6 +158,7 @@ export function AuthPage({ mode: initialMode }) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 />
                 <button type="button" className="icon-button subtle" onClick={() => setShowPassword((current) => !current)}>
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -169,6 +175,7 @@ export function AuthPage({ mode: initialMode }) {
                     type={showConfirm ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
+                    autoComplete="new-password"
                   />
                   <button type="button" className="icon-button subtle" onClick={() => setShowConfirm((current) => !current)}>
                     {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -176,19 +183,14 @@ export function AuthPage({ mode: initialMode }) {
                 </div>
                 {errors.confirmPassword ? <small className="field-error">{errors.confirmPassword}</small> : null}
               </label>
-            ) : (
-              <div className="forgot-row">
-                <span />
-                <button type="button">Forgot password?</button>
-              </div>
-            )}
+            ) : null}
 
             <button className="button primary large wide" type="submit" disabled={loading}>
               {loading ? <LoaderCircle className="spin" size={18} /> : null}
               {loading ? (mode === 'login' ? 'Opening vault...' : 'Creating vault...') : mode === 'login' ? 'Open Vault' : 'Create Vault'}
             </button>
 
-            {error ? <p style={{ color: 'red' }}>{error}</p> : null}
+            {error ? <p role="alert" aria-live="polite" style={{ color: 'red' }}>{error}</p> : null}
           </form>
 
           <p className="auth-switch">

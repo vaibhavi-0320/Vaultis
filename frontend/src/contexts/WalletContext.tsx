@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getAddress } from 'ethers'
-import { useToast } from '../contexts/ToastContext'
+import { useToast } from './ToastContext'
 import { authApi, getToken } from '../lib/api'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from './AuthContext'
 import { WalletContext } from './walletContextCore'
 
 const STORAGE_KEY = 'vaultis_wallet_session'

@@ -7,7 +7,7 @@ import { useLVTToken } from '../hooks/useLVTToken'
 import { useAssets, useCheckInStatus, useContacts } from '../lib/api'
 import { WalletConnectButton } from './WalletConnectButton'
 import { VaultisBrand } from './VaultisBrand'
-import { useWallet } from '../context/useWallet'
+import { useWallet } from '../contexts/useWallet'
 
 const navigation = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -112,8 +112,18 @@ export function AppShell({ title, children }) {
       }
     }
 
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsNotificationOpen(false)
+      }
+    }
+
     document.addEventListener('mousedown', handlePointerDown)
-    return () => document.removeEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [isNotificationOpen])
 
   return (
@@ -171,13 +181,15 @@ export function AppShell({ title, children }) {
                     <button
                       className="icon-button notification-button"
                       aria-label="Notifications"
+                      aria-haspopup="true"
+                      aria-expanded={isNotificationOpen}
                       onClick={() => setIsNotificationOpen((current) => !current)}
                     >
                       <Bell size={18} />
                       {hasUnread ? <span className="badge-dot" /> : null}
                     </button>
                     {isNotificationOpen ? (
-                      <div className="notification-dropdown">
+                      <div className="notification-dropdown" role="menu" aria-label="Notifications">
                         <div className="notification-dropdown-head">
                           <strong>Notifications</strong>
                           <button type="button" className="notification-clear" onClick={() => setHasUnread(false)}>
@@ -186,7 +198,7 @@ export function AppShell({ title, children }) {
                         </div>
                         <div className="notification-list">
                           {dynamicNotifications.map((item) => (
-                            <div className="notification-item" key={`${item.icon}-${item.message}`}>
+                            <div className="notification-item" role="menuitem" key={`${item.icon}-${item.message}`}>
                               <span className="notification-item-icon">{item.icon}</span>
                               <span className="notification-item-copy">{item.message}</span>
                               <span className="notification-item-meta">{item.meta}</span>

@@ -1,11 +1,11 @@
 import { Activity, Database, ShieldCheck, Wallet } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { CardSkeleton } from '../components/Loading'
+import { CardSkeleton, ErrorState } from '../components/Loading'
 import { TransactionHistory } from '../components/TransactionHistory'
 import { useAuth } from '../contexts/AuthContext'
 import { useLVTToken } from '../hooks/useLVTToken'
 import { useSecurityStatus } from '../lib/api'
-import { useWallet } from '../context/useWallet'
+import { useWallet } from '../contexts/useWallet'
 
 const SEPOLIA_CHAIN_ID = '0xaa36a7'
 const SEPOLIA_CHAIN_ID_DECIMAL = 11155111
@@ -130,6 +130,16 @@ export function SecurityPage() {
         <CardSkeleton />
         <CardSkeleton />
       </div>
+    )
+  }
+
+  if (securityQuery.isError) {
+    return (
+      <ErrorState
+        title="Couldn't load your security status"
+        message="There was a problem reaching the VAULTIS API. Check your connection and try again."
+        onRetry={() => securityQuery.refetch()}
+      />
     )
   }
 

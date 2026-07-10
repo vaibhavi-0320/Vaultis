@@ -1,8 +1,8 @@
-import { Coins, LoaderCircle, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Coins, LoaderCircle, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useToast } from '../contexts/ToastContext'
-import { useWallet } from '../context/useWallet'
+import { useWallet } from '../contexts/useWallet'
 import { useLVTToken } from '../hooks/useLVTToken'
 import { useStakeMutation, useTokenBalance, useUnstakeMutation } from '../lib/api'
 
@@ -21,16 +21,24 @@ export function TokensPage() {
 
   const submitStake = async (event) => {
     event.preventDefault()
-    const result = await stakeMutation.mutateAsync(Number(stakeAmount))
-    pushToast({ type: 'success', title: 'Stake confirmed', message: result.message })
-    setStakeAmount('')
+    try {
+      const result = await stakeMutation.mutateAsync(Number(stakeAmount))
+      pushToast({ type: 'success', title: 'Stake confirmed', message: result.message })
+      setStakeAmount('')
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   const submitUnstake = async (event) => {
     event.preventDefault()
-    const result = await unstakeMutation.mutateAsync(Number(unstakeAmount))
-    pushToast({ type: 'success', title: 'Unstake confirmed', message: `${result.message}` })
-    setUnstakeAmount('')
+    try {
+      const result = await unstakeMutation.mutateAsync(Number(unstakeAmount))
+      pushToast({ type: 'success', title: 'Unstake confirmed', message: `${result.message}` })
+      setUnstakeAmount('')
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   return (
@@ -44,6 +52,13 @@ export function TokensPage() {
           Start Earning
         </Link>
       </div>
+
+      {balanceQuery.isError ? (
+        <div className="notice-banner warning">
+          <AlertTriangle size={18} />
+          <p>Couldn&apos;t load your backend token balance. On-chain data below may be out of sync. <button type="button" className="icon-button subtle" onClick={() => balanceQuery.refetch()}>Retry</button></p>
+        </div>
+      ) : null}
 
       <div className="cards-grid three">
         <article className="glass-panel stat-card">

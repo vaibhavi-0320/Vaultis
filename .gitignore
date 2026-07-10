@@ -25,3 +25,6 @@ frontend/dist/
 .hardhat/
 cache/
 artifacts/
+backend/data/local-store.json
+backend/*.log
+backend/auth-test.*.log

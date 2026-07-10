@@ -1,7 +1,7 @@
 import { Bitcoin, FileText, Filter, KeyRound, Package, Plus, Search, Shield, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ConfirmationModal, Modal } from '../components/Modal'
-import { CardSkeleton, EmptyState } from '../components/Loading'
+import { CardSkeleton, EmptyState, ErrorState } from '../components/Loading'
 import { useToast } from '../contexts/ToastContext'
 import { useAssets, useCreateAssetMutation, useDeleteAssetMutation } from '../lib/api'
 
@@ -58,20 +58,28 @@ export function AssetsPage() {
       beneficiaryName: sanitizeText(form.beneficiaryName)
     }
 
-    await createAsset.mutateAsync(payload)
-    pushToast({
-      type: 'success',
-      title: 'Asset encrypted and stored',
-      message: `${payload.title} is encrypted and ready for staged release.`
-    })
-    setForm(initialAsset)
-    setIsOpen(false)
+    try {
+      await createAsset.mutateAsync(payload)
+      pushToast({
+        type: 'success',
+        title: 'Asset encrypted and stored',
+        message: `${payload.title} is encrypted and ready for staged release.`
+      })
+      setForm(initialAsset)
+      setIsOpen(false)
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   const confirmDelete = async () => {
-    await deleteAsset.mutateAsync(deleteId)
-    pushToast({ type: 'warning', title: 'Asset archived', message: 'The asset was removed from active monitoring.' })
-    setDeleteId('')
+    try {
+      await deleteAsset.mutateAsync(deleteId)
+      pushToast({ type: 'warning', title: 'Asset archived', message: 'The asset was removed from active monitoring.' })
+      setDeleteId('')
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   return (
@@ -104,6 +112,12 @@ export function AssetsPage() {
           <CardSkeleton tall />
           <CardSkeleton tall />
         </div>
+      ) : assetsQuery.isError ? (
+        <ErrorState
+          title="Couldn't load your assets"
+          message="There was a problem reaching the VAULTIS API. Check your connection and try again."
+          onRetry={() => assetsQuery.refetch()}
+        />
       ) : assets.length === 0 ? (
         <EmptyState
           icon={<Package size={40} />}

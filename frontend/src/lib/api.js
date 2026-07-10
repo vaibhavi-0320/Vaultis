@@ -82,6 +82,33 @@ function notifyApiError({ title = 'Request failed', message, status }) {
   }))
 }
 
+// Errors with status >= 500 (or network-unreachable, status undefined) are already
+// surfaced by apiFetch itself. This only covers the gap: ordinary 4xx validation/
+// permission errors from a mutation, which otherwise fail with no visible feedback.
+function onMutationError(error) {
+  if (!error?.status || error.status >= 500) {
+    return
+  }
+  notifyApiError({
+    title: 'Action failed',
+    message: error.message || 'Something went wrong. Please try again.',
+    status: error.status
+  })
+}
+
+let navigateFn = null
+export function setNavigate(fn) {
+  navigateFn = fn
+}
+
+function redirectToLogin() {
+  if (navigateFn) {
+    navigateFn('/login', { replace: true })
+  } else {
+    window.location.href = '/login'
+  }
+}
+
 function clearToken() {
   clearAuthStorage()
 }
@@ -131,7 +158,7 @@ async function apiFetch(path, options = {}) {
 
   if (response.status === 401 && normalizedPath !== '/api/auth/login') {
     clearToken()
-    window.location.href = '/login'
+    redirectToLogin()
     throw new Error('Unauthorized')
   }
 
@@ -164,7 +191,9 @@ export const authApi = {
 export const checkInApi = {
   status: () => apiFetch('/api/checkin/status'),
   submit: () => apiFetch('/api/checkin', { method: 'POST' }),
-  history: () => apiFetch('/api/checkin/history')
+  history: () => apiFetch('/api/checkin/history'),
+  saveTx: (payload) => apiFetch('/api/checkin/save-tx', { method: 'POST', body: JSON.stringify(payload) }),
+  demoReset: () => apiFetch('/api/checkin/demo-reset', { method: 'POST' })
 }
 
 export const assetsApi = {
@@ -177,8 +206,8 @@ export const assetsApi = {
 export const contactsApi = {
   list: () => apiFetch('/api/contacts'),
   create: (payload) => apiFetch('/api/contacts', { method: 'POST', body: JSON.stringify(payload) }),
-  remove: (id) => apiFetch(`/api/contacts/${id}`, { method: 'DELETE' }),
-  confirm: (userId, contactId, vote) => apiFetch(`/api/contacts/confirm/${userId}/${contactId}/${vote}`)
+  update: (id, payload) => apiFetch(`/api/contacts/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  remove: (id) => apiFetch(`/api/contacts/${id}`, { method: 'DELETE' })
 }
 
 export const tokensApi = {
@@ -251,6 +280,7 @@ export function useWalletMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: authApi.updateWallet,
+    onError: onMutationError,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.user })
   })
 }
@@ -259,6 +289,7 @@ export function useCheckInMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: checkInApi.submit,
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.checkIn })
       queryClient.invalidateQueries({ queryKey: queryKeys.balance })
@@ -274,6 +305,7 @@ export function useCreateAssetMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: assetsApi.create,
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.assets })
       queryClient.invalidateQueries({ queryKey: queryKeys.overview })
@@ -286,6 +318,7 @@ export function useUpdateAssetMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, payload }) => assetsApi.update(id, payload),
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.assets })
       queryClient.invalidateQueries({ queryKey: queryKeys.overview })
@@ -298,6 +331,7 @@ export function useDeleteAssetMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: assetsApi.remove,
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.assets })
       queryClient.invalidateQueries({ queryKey: queryKeys.overview })
@@ -310,6 +344,7 @@ export function useAddContactMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: contactsApi.create,
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts })
       queryClient.invalidateQueries({ queryKey: queryKeys.overview })
@@ -322,6 +357,7 @@ export function useDeleteContactMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: contactsApi.remove,
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts })
       queryClient.invalidateQueries({ queryKey: queryKeys.overview })
@@ -334,6 +370,7 @@ export function useStakeMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: tokensApi.stake,
+    onError: onMutationError,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.balance })
   })
 }
@@ -342,6 +379,7 @@ export function useUnstakeMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: tokensApi.unstake,
+    onError: onMutationError,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.balance })
   })
 }
@@ -350,6 +388,7 @@ export function useSaveWillMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: willApi.save,
+    onError: onMutationError,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.will })
       queryClient.invalidateQueries({ queryKey: queryKeys.overview })

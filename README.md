@@ -232,6 +232,31 @@ withdrawLVT(uint256 _amount)       // Emergency owner withdrawal
 
 ---
 
+## ◈ Redeploying the LVT Token
+
+`blockchain/` is a real Hardhat project — `frontend/src/contracts/LVTToken.json` (live ABI) and `frontend/src/contracts/LVTToken.sol` (Solidity source) are generated from it.
+
+```bash
+cd blockchain
+npm install
+cp .env.example .env   # fill in SEPOLIA_RPC_URL, DEPLOYER_PRIVATE_KEY, ETHERSCAN_API_KEY
+npx hardhat compile
+npx hardhat test
+npx hardhat run scripts/deploy.js --network sepolia
+```
+
+A successful deploy run prints the new contract address and automatically rewrites `frontend/src/contracts/LVTToken.json`. You still need to manually update `VAULTIS_TOKEN_ADDRESS` (`backend/.env`) and `VITE_LVT_CONTRACT_ADDRESS` (`frontend/.env`). `frontend/src/contracts/REMIX_DEPLOY_GUIDE.txt` documents the legacy manual Remix flow as a fallback.
+
+## ◈ AWS S3 Document Storage (optional)
+
+By default, encrypted will/asset content is stored inline in MongoDB. To store it in S3 instead (only the AES-256-GCM ciphertext ever leaves the server — S3 never sees plaintext):
+
+1. Create an S3 bucket and an IAM user/role with `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` scoped to that bucket.
+2. In `backend/.env`, set `AWS_S3_ENABLED=true` and fill in `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_S3_BUCKET`.
+3. Restart the backend. New wills saved via `POST /api/will` are written to S3; existing MongoDB-stored wills keep working unchanged (the read path checks each document's `storageProvider`).
+
+---
+
 ## ◈ Roadmap
 
 ```

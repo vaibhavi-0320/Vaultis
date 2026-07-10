@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { API_BASE, getToken } from '../lib/api'
+import { checkInApi } from '../lib/api'
 
 function formatTimestamp(value) {
   if (!value) {
@@ -43,11 +43,7 @@ function TransactionHistory({ onRefresh = 0 }) {
   const fetchHistory = async () => {
     setLoading(true)
     try {
-      const token = getToken() || window.localStorage.getItem('vaultis_token')
-      const res = await fetch(`${API_BASE}/api/checkin/history`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      })
-      const data = await res.json()
+      const data = await checkInApi.history()
       if (data.success && Array.isArray(data.history) && data.history.length > 0) {
         setHistory(data.history)
       } else {
@@ -172,5 +168,4 @@ function TransactionHistory({ onRefresh = 0 }) {
   )
 }
 
-export default TransactionHistory
 export { TransactionHistory }

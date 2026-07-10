@@ -64,12 +64,14 @@ const sendCheckInReminder = (email, name, daysLeft) => sendEmail(
   </div>`
 );
 
-const sendContactAlert = (contactEmail, contactName, 
-                           userName, userId, contactId) => {
-  const confirmUrl = 
-    `${process.env.FRONTEND_URL}/confirm/${userId}/${contactId}/confirmed`;
-  const denyUrl = 
-    `${process.env.FRONTEND_URL}/confirm/${userId}/${contactId}/denied`;
+const sendContactAlert = (contactEmail, contactName,
+                           userName, userId, contactId, token) => {
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+  const tokenParam = `?token=${encodeURIComponent(token)}`;
+  const confirmUrl =
+    `${backendUrl}/api/contacts/vote/${userId}/${contactId}/confirmed${tokenParam}`;
+  const denyUrl =
+    `${backendUrl}/api/contacts/vote/${userId}/${contactId}/denied${tokenParam}`;
   return sendEmail(
     contactEmail,
     `VAULTIS — Please confirm status of ${userName}`,
