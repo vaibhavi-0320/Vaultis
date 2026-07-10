@@ -1,4 +1,4 @@
-import { ExternalLink, FileSignature, LoaderCircle, Save, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, ExternalLink, FileSignature, LoaderCircle, Save, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useToast } from '../contexts/ToastContext'
 import { useSaveWillMutation, useWill } from '../lib/api'
@@ -35,21 +35,25 @@ export function WillPage() {
   }, [willQuery.data])
 
   const saveDraft = async (registerOnChain) => {
-    const localHash = await buildSha256Hex(content)
-    const result = await saveWill.mutateAsync({ content, summary, registerOnChain })
-    setProof({
-      hash: localHash || result.will.sha256Hash,
-      txHash: result.will.blockchainTxHash,
-      status: result.will.proofStatus,
-      registeredAt: result.will.proofRegisteredAt || null
-    })
-    pushToast({
-      type: registerOnChain ? 'success' : 'info',
-      title: registerOnChain ? 'Will secured on chain' : 'Draft encrypted and saved to MongoDB',
-      message: registerOnChain
-        ? `Hash registered: ${localHash.slice(0, 10)}...${localHash.slice(-6)}`
-        : 'Draft encrypted and saved to MongoDB'
-    })
+    try {
+      const localHash = await buildSha256Hex(content)
+      const result = await saveWill.mutateAsync({ content, summary, registerOnChain })
+      setProof({
+        hash: localHash || result.will.sha256Hash,
+        txHash: result.will.blockchainTxHash,
+        status: result.will.proofStatus,
+        registeredAt: result.will.proofRegisteredAt || null
+      })
+      pushToast({
+        type: registerOnChain ? 'success' : 'info',
+        title: registerOnChain ? 'Will secured on chain' : 'Draft encrypted and saved to MongoDB',
+        message: registerOnChain
+          ? `Hash registered: ${localHash.slice(0, 10)}...${localHash.slice(-6)}`
+          : 'Draft encrypted and saved to MongoDB'
+      })
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   const copyProofHash = async () => {
@@ -67,6 +71,12 @@ export function WillPage() {
 
   return (
     <div className="page-stack">
+      {willQuery.isError ? (
+        <div className="notice-banner warning">
+          <AlertTriangle size={18} />
+          <p>Couldn&apos;t load your saved will. <button type="button" className="icon-button subtle" onClick={() => willQuery.refetch()}>Retry</button></p>
+        </div>
+      ) : null}
       <div className="split-grid wide-narrow">
         <article className="glass-panel will-editor">
           <div className="panel-head">

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as ethers from 'ethers'
 import toast from 'react-hot-toast'
-import { useWallet } from '../context/useWallet'
-import { API_BASE, getToken } from '../lib/api'
+import { useWallet } from '../contexts/useWallet'
+import { checkInApi } from '../lib/api'
 
 const DEMO_OVERRIDE_KEY = 'vaultis_demo_checkin_override'
 const DEMO_FORCE_ZERO_BALANCE_KEY = 'vaultis_demo_force_zero_balance'
@@ -66,8 +66,9 @@ function formatEtherCompat(value) {
   throw new Error('Unable to format token balance with the installed ethers version.')
 }
 
+// Demo-mode overrides are dev-only tooling for local demos/screenshots — never active in a production build.
 function readDemoOverride() {
-  if (typeof window === 'undefined') {
+  if (!import.meta.env.DEV || typeof window === 'undefined') {
     return false
   }
 
@@ -75,7 +76,7 @@ function readDemoOverride() {
 }
 
 function shouldForceZeroBalance() {
-  if (typeof window === 'undefined') {
+  if (!import.meta.env.DEV || typeof window === 'undefined') {
     return false
   }
 
@@ -262,9 +263,8 @@ export function useLVTToken() {
       let canDoCheckIn = true
       try {
         canDoCheckIn = await contract.canUserCheckIn(userAddress)
-      } catch (checkErr) {
-        // If canUserCheckIn fails, try anyway
-        console.log('Cooldown check skipped:', checkErr.message)
+      } catch {
+        // If canUserCheckIn fails, proceed and let the contract call itself fail/succeed
       }
 
       if (!canDoCheckIn) {
@@ -300,8 +300,7 @@ export function useLVTToken() {
         const formatted = parseFloat(newBalance).toFixed(2)
         setLvtBalance(formatted)
         localStorage.setItem('vaultis_lvt_balance', formatted)
-      } catch (balErr) {
-        console.log('Balance read error:', balErr.message)
+      } catch {
         const cached = parseFloat(
           localStorage.getItem('vaultis_lvt_balance') || '0'
         )
@@ -311,16 +310,12 @@ export function useLVTToken() {
       }
 
       // Step 11: Save TX to backend
-      const token = getToken() || localStorage.getItem('vaultis_token')
-      const apiBase = import.meta.env.VITE_API_URL || API_BASE || 'http://localhost:5000'
-
       const txData = {
         txHash: receipt.hash || receipt.transactionHash,
         blockNumber: typeof receipt.blockNumber === 'bigint'
           ? Number(receipt.blockNumber)
           : receipt.blockNumber,
         status: 'confirmed',
-        lvtRewarded: 10,
         network: 'Ethereum Sepolia',
         etherscanUrl: `https://sepolia.etherscan.io/tx/${receipt.hash || receipt.transactionHash}`
       }
@@ -328,20 +323,12 @@ export function useLVTToken() {
       // Save to localStorage immediately
       storeTxHistoryBackup({
         ...txData,
+        lvtRewarded: 10,
         timestamp: new Date().toISOString()
       })
 
-      // Save to backend (non-blocking)
-      if (token) {
-        fetch(`${apiBase}/api/checkin/save-tx`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(txData)
-        }).catch(e => console.log('TX save error:', e.message))
-      }
+      // Save to backend (non-blocking) — reward amount is determined server-side
+      checkInApi.saveTx(txData).catch(() => {})
 
       setCanCheckIn(false)
       setHoursUntilNextCheckIn(24)
@@ -423,6 +410,9 @@ export function useLVTToken() {
   }, [contractAddress, hasContractConfig])
 
   const resetCooldownForDemo = useCallback(() => {
+    if (!import.meta.env.DEV) {
+      return { success: false, message: 'Demo mode is only available in development builds.' }
+    }
     window.localStorage.setItem(DEMO_OVERRIDE_KEY, 'true')
     setDemoOverrideActive(true)
     setCanCheckIn(true)
@@ -502,8 +492,7 @@ export function useLVTToken() {
 
         setContractReachable(true)
 
-      } catch (err) {
-        console.log('Contract init error:', err.message)
+      } catch {
         setContractReachable(false)
       }
     }

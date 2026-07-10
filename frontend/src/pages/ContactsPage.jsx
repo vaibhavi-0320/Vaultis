@@ -1,6 +1,6 @@
 import { Trash2, UserPlus, Users } from 'lucide-react'
 import { useState } from 'react'
-import { CardSkeleton, EmptyState } from '../components/Loading'
+import { CardSkeleton, EmptyState, ErrorState } from '../components/Loading'
 import { ConfirmationModal, Modal } from '../components/Modal'
 import { useToast } from '../contexts/ToastContext'
 import { useAddContactMutation, useContacts, useDeleteContactMutation } from '../lib/api'
@@ -20,16 +20,24 @@ export function ContactsPage() {
 
   const submit = async (event) => {
     event.preventDefault()
-    await addContact.mutateAsync(form)
-    pushToast({ type: 'success', title: 'Trusted contact added', message: `${form.name} was added to your verification circle.` })
-    setForm(initialContact)
-    setOpen(false)
+    try {
+      await addContact.mutateAsync(form)
+      pushToast({ type: 'success', title: 'Trusted contact added', message: `${form.name} was added to your verification circle.` })
+      setForm(initialContact)
+      setOpen(false)
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   const confirmDelete = async () => {
-    await removeContact.mutateAsync(deleteId)
-    setDeleteId('')
-    pushToast({ type: 'warning', title: 'Contact removed', message: 'The trust relationship has been cleared.' })
+    try {
+      await removeContact.mutateAsync(deleteId)
+      setDeleteId('')
+      pushToast({ type: 'warning', title: 'Contact removed', message: 'The trust relationship has been cleared.' })
+    } catch {
+      // Surfaced via the shared mutation error toast in lib/api.js
+    }
   }
 
   return (
@@ -50,6 +58,12 @@ export function ContactsPage() {
           <CardSkeleton />
           <CardSkeleton />
         </div>
+      ) : contactsQuery.isError ? (
+        <ErrorState
+          title="Couldn't load your contacts"
+          message="There was a problem reaching the VAULTIS API. Check your connection and try again."
+          onRetry={() => contactsQuery.refetch()}
+        />
       ) : contacts.length === 0 ? (
         <EmptyState
           icon={<Users size={40} />}

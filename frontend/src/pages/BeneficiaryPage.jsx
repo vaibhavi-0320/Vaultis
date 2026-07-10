@@ -121,10 +121,6 @@ function BeneficiaryContent({ triggered }) {
             and a concierge contact for next steps.
           </p>
         </div>
-        <div className="button-row">
-          <button className="button primary rounded">Speak with Concierge</button>
-          <button className="button ghost rounded">Read Legal FAQ</button>
-        </div>
       </div>
 
       <div className="cards-grid three">

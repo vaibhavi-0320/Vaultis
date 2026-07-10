@@ -1,13 +1,13 @@
 import { Fingerprint, LoaderCircle, RefreshCw, ShieldAlert, ShieldCheck, TimerReset, Wallet } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CardSkeleton } from '../components/Loading'
+import { CardSkeleton, ErrorState } from '../components/Loading'
 import { TransactionHistory } from '../components/TransactionHistory'
 import { useToast } from '../contexts/ToastContext'
 import { useAuth } from '../contexts/AuthContext'
-import { useWallet } from '../context/useWallet'
+import { useWallet } from '../contexts/useWallet'
 import { useLVTToken } from '../hooks/useLVTToken'
-import { API_BASE, useCheckInMutation, useCheckInStatus, useOverview, useSecurityStatus } from '../lib/api'
+import { checkInApi, useCheckInMutation, useCheckInStatus, useOverview, useSecurityStatus } from '../lib/api'
 
 function calculateCountdown(lastCheckIn, intervalDays = 45) {
   if (!lastCheckIn) {
@@ -97,6 +97,7 @@ export function DashboardPage() {
   const summary = overview.data?.summary
   const securityState = security.data?.security
   const loading = status.isLoading || overview.isLoading || security.isLoading
+  const hasError = status.isError || overview.isError || security.isError
   const walletConnected = Boolean(connectedWallet === 'metamask' && walletAddress)
   const effectiveLastCheckIn = optimisticLastCheckIn || status.data?.lastCheckIn
   const daysUntilWarning = effectiveLastCheckIn
@@ -112,6 +113,11 @@ export function DashboardPage() {
   }, [status.data?.lastCheckIn])
 
   useEffect(() => {
+    // Dev-only demo reset shortcut — never registered in a production build.
+    if (!import.meta.env.DEV) {
+      return undefined
+    }
+
     const handleDemoReset = async (event) => {
       if (!event.ctrlKey || !event.shiftKey || event.key.toLowerCase() !== 'd') {
         return
@@ -125,15 +131,7 @@ export function DashboardPage() {
           message: 'Clearing cooldown, history, and local demo data.'
         })
 
-        const response = await fetch(`${API_BASE}/api/checkin/demo-reset`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('vaultis_token') || sessionStorage.getItem('vaultis_token') || ''}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        const data = await response.json()
-
+        const data = await checkInApi.demoReset()
         if (!data.success) {
           throw new Error(data.message)
         }
@@ -309,6 +307,20 @@ export function DashboardPage() {
         <CardSkeleton tall />
         <CardSkeleton tall />
       </div>
+    )
+  }
+
+  if (hasError) {
+    return (
+      <ErrorState
+        title="Couldn't load your dashboard"
+        message="There was a problem reaching the VAULTIS API. Check your connection and try again."
+        onRetry={() => {
+          status.refetch()
+          overview.refetch()
+          security.refetch()
+        }}
+      />
     )
   }
 

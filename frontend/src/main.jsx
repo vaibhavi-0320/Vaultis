@@ -8,7 +8,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { AuthProvider } from './contexts/AuthContext'
-import { WalletProvider } from './context/WalletContext'
+import { WalletProvider } from './contexts/WalletContext'
 import './style.css'
 
 const queryClient = new QueryClient({

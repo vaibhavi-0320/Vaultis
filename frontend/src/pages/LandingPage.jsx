@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2, Moon, Sun } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useTheme } from '../contexts/ThemeContext'
 import { VaultisBrand } from '../components/VaultisBrand'
@@ -761,6 +761,7 @@ function resetTiltTarget(target) {
 }
 
 export function LandingPage() {
+  const navigate = useNavigate()
   const { toggleTheme, isDark } = useTheme()
   const demo = useDemoTimer()
   const marqueeItems = [...protocolItems, ...protocolItems]
@@ -932,6 +933,8 @@ export function LandingPage() {
           </div>
 
           <button
+            type="button"
+            onClick={() => navigate('/login')}
             style={{
               width: '100%',
               padding: '16px',
