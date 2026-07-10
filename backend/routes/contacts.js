@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const Contact = require('../models/Contact');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
@@ -11,6 +12,23 @@ const {
   updateUser: updateLocalUser
 } = require('../services/localStore');
 const router = express.Router();
+
+const CONTACT_UPDATE_FIELDS = ['name', 'email', 'trustWeight', 'relationship', 'phone'];
+
+const pickAllowedFields = (body, fields) => fields.reduce((acc, field) => {
+  if (Object.prototype.hasOwnProperty.call(body, field)) {
+    acc[field] = body[field];
+  }
+  return acc;
+}, {});
+
+const tokensMatch = (provided, expected) => {
+  if (!expected || !provided) return false;
+  const providedBuf = Buffer.from(String(provided));
+  const expectedBuf = Buffer.from(String(expected));
+  if (providedBuf.length !== expectedBuf.length) return false;
+  return crypto.timingSafeEqual(providedBuf, expectedBuf);
+};
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -57,14 +75,16 @@ router.post('/', protect, async (req, res) => {
 
 router.put('/:id', protect, async (req, res) => {
   try {
+    const updates = pickAllowedFields(req.body, CONTACT_UPDATE_FIELDS);
+
     if (!isDatabaseReady()) {
-      const contact = await updateLocalContact(req.user._id, req.params.id, req.body);
+      const contact = await updateLocalContact(req.user._id, req.params.id, updates);
       if (!contact) return res.status(404).json({ success: false, message: 'Contact not found' });
       return res.json({ success: true, contact });
     }
     const contact = await Contact.findOneAndUpdate(
       { _id: req.params.id, userId: req.user._id },
-      req.body, { new: true }
+      updates, { new: true }
     );
     if (!contact) return res.status(404).json({
       success: false, message: 'Contact not found'
@@ -92,7 +112,7 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-const applyVote = async (userId, contactId, vote) => {
+const applyVote = async (userId, contactId, vote, token) => {
   if (!['confirmed', 'denied'].includes(vote)) {
     const error = new Error('Invalid vote');
     error.statusCode = 400;
@@ -103,30 +123,44 @@ const applyVote = async (userId, contactId, vote) => {
   let confirmedCount;
 
   if (!isDatabaseReady()) {
-    contact = await updateLocalContact(userId, contactId, {
-      voteStatus: vote,
-      votedAt: new Date().toISOString()
-    });
-    if (!contact) {
+    const { listContacts: listLocalContacts } = require('../services/localStore');
+    const existing = (await listLocalContacts(userId)).find((c) => c._id === contactId);
+    if (!existing) {
       const error = new Error('Contact not found');
       error.statusCode = 404;
       throw error;
     }
-    const { listContacts: listLocalContacts } = require('../services/localStore');
+    if (!tokensMatch(token, existing.verificationToken)) {
+      const error = new Error('Invalid or expired confirmation link');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    contact = await updateLocalContact(userId, contactId, {
+      voteStatus: vote,
+      votedAt: new Date().toISOString(),
+      verificationToken: ''
+    });
     const allContacts = await listLocalContacts(userId);
     confirmedCount = allContacts.filter((c) => c.voteStatus === 'confirmed').length;
   } else {
-    contact = await Contact.findOneAndUpdate(
-      { _id: contactId, userId },
-      { voteStatus: vote, votedAt: new Date() },
-      { new: true }
-    );
-
-    if (!contact) {
+    const existing = await Contact.findOne({ _id: contactId, userId });
+    if (!existing) {
       const error = new Error('Contact not found');
       error.statusCode = 404;
       throw error;
     }
+    if (!tokensMatch(token, existing.verificationToken)) {
+      const error = new Error('Invalid or expired confirmation link');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    contact = await Contact.findOneAndUpdate(
+      { _id: contactId, userId },
+      { voteStatus: vote, votedAt: new Date(), verificationToken: '' },
+      { new: true }
+    );
 
     confirmedCount = await Contact.countDocuments({
       userId,
@@ -145,40 +179,22 @@ const applyVote = async (userId, contactId, vote) => {
   return { contact, confirmedCount };
 };
 
-router.get('/confirm/:userId/:contactId/:vote', async (req, res) => {
-  try {
-    const { userId, contactId, vote } = req.params;
-    const { contact, confirmedCount } = await applyVote(userId, contactId, vote);
-    res.json({
-      success: true,
-      vote,
-      contact: {
-        id: contact._id,
-        name: contact.name
-      },
-      confirmedCount
-    });
-  } catch (error) {
-    console.error('GET /confirm error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Something went wrong. Please try again.'
-    });
-  }
-});
-
-// Public vote route (email link)
+// Public vote route (email link) — the sole endpoint that casts a vote.
+// Token-gated to prevent forging a beneficiary confirmation without the emailed link.
+// Redirects to the frontend confirm page, which only ever displays the result.
 router.get('/vote/:userId/:contactId/:vote', async (req, res) => {
+  const { userId, contactId, vote } = req.params;
   try {
-    const { userId, contactId, vote } = req.params;
-    const { contact } = await applyVote(userId, contactId, vote);
-    // Redirect to frontend confirmation page
+    const { contact } = await applyVote(userId, contactId, vote, req.query.token);
     res.redirect(
-      `${process.env.FRONTEND_URL}/confirm/${userId}/${contactId}/${vote}?name=${encodeURIComponent(contact.name)}`
+      `${process.env.FRONTEND_URL}/confirm/${userId}/${contactId}/${vote}?success=true&name=${encodeURIComponent(contact.name)}`
     );
   } catch (error) {
     console.error('GET /vote error:', error);
-    res.status(500).json({ success: false, message: 'Something went wrong. Please try again.' });
+    const message = error.statusCode ? error.message : 'Something went wrong. Please try again.';
+    res.redirect(
+      `${process.env.FRONTEND_URL}/confirm/${userId}/${contactId}/${vote}?success=false&error=${encodeURIComponent(message)}`
+    );
   }
 });
 

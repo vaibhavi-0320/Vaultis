@@ -227,11 +227,15 @@ router.post('/login', loginLimiter, [
       ? await User.findOne({ email: normalizedEmail })
       : await findUserByEmail(normalizedEmail);
 
+    // Generic error for both "no account" and "wrong password" — a distinct message
+    // for each would let an attacker enumerate registered emails.
+    const invalidCredentials = () => res.status(401).json({
+      success: false,
+      message: 'Invalid email or password.'
+    });
+
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'No account found for this email.'
-      });
+      return invalidCredentials();
     }
 
     const isValid = isDatabaseReady()
@@ -239,10 +243,7 @@ router.post('/login', loginLimiter, [
       : await bcrypt.compare(password, user.password);
 
     if (!isValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Incorrect password.'
-      });
+      return invalidCredentials();
     }
 
     if (isDatabaseReady()) {
@@ -370,7 +371,7 @@ router.delete('/account', protect, async (req, res) => {
     const userId = req.user._id;
 
     if (isDatabaseReady()) {
-      // Delete all associated documents in MongoDB
+      // Delete all associated documents in MongoDB (including prior activity logs)
       await Promise.all([
         Asset.deleteMany({ userId }),
         Contact.deleteMany({ userId }),
@@ -379,30 +380,28 @@ router.delete('/account', protect, async (req, res) => {
         Beneficiary.deleteMany({ userId }),
         Notification.deleteMany({ userId }),
         InheritanceWorkflow.deleteMany({ userId }),
-        ActivityLog.deleteMany({ userId }),
-        User.findByIdAndDelete(userId)
+        ActivityLog.deleteMany({ userId })
       ]);
-    } else {
-      await deleteUserData(userId);
-    }
 
-    // Record the deletion for audit purposes before the user is deleted
-    // Note: This might fail if user is already deleted, so we wrap it
-    try {
-      if (isDatabaseReady()) {
-        // Create an audit log entry with a temporary null userId reference
+      // Record the deletion for audit purposes while userId is still a valid
+      // reference, then remove the user document last so this entry survives.
+      try {
         await ActivityLog.create({
-          userId: null,
+          userId,
           eventType: 'account_deleted',
           title: 'Account deleted',
-          description: `User account permanently deleted. All data removed.`,
+          description: 'User account permanently deleted. All data removed.',
           severity: 'critical',
           metadata: { deletedUserId: userId, timestamp: new Date() }
         });
+      } catch (auditError) {
+        // Log but don't fail - deletion is more important than audit
+        console.error('Failed to record account deletion audit log:', auditError);
       }
-    } catch (auditError) {
-      // Log but don't fail - deletion is more important than audit
-      console.error('Failed to record account deletion audit log:', auditError);
+
+      await User.findByIdAndDelete(userId);
+    } else {
+      await deleteUserData(userId);
     }
 
     // Return success - user is now deleted

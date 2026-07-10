@@ -37,17 +37,28 @@ router.post('/stake', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Valid amount required' });
     }
 
-    const user = isDatabaseReady() ? await User.findById(req.user._id) : await findUserById(req.user._id);
-    if (amt > user.lvtBalance) {
-      return res.status(400).json({ success: false, message: 'Insufficient LVT balance' });
-    }
-
-    user.lvtBalance -= amt;
-    user.stakedAmount += amt;
-    user.stakeStartTime = user.stakeStartTime || new Date().toISOString();
+    let user;
 
     if (isDatabaseReady()) {
-      await user.save();
+      // Atomic, guarded update: the $gte filter and pipeline update run as one
+      // operation on the database, so two concurrent stake requests can't both
+      // pass the balance check against a stale in-memory value.
+      user = await User.findOneAndUpdate(
+        { _id: req.user._id, lvtBalance: { $gte: amt } },
+        [{
+          $set: {
+            lvtBalance: { $subtract: ['$lvtBalance', amt] },
+            stakedAmount: { $add: ['$stakedAmount', amt] },
+            stakeStartTime: { $ifNull: ['$stakeStartTime', new Date()] }
+          }
+        }],
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(400).json({ success: false, message: 'Insufficient LVT balance' });
+      }
+
       await Notification.create({
         userId: user._id,
         type: 'stake_update',
@@ -56,6 +67,13 @@ router.post('/stake', protect, async (req, res) => {
         data: { staked: amt, total: user.stakedAmount }
       });
     } else {
+      user = await findUserById(req.user._id);
+      if (amt > user.lvtBalance) {
+        return res.status(400).json({ success: false, message: 'Insufficient LVT balance' });
+      }
+      user.lvtBalance -= amt;
+      user.stakedAmount += amt;
+      user.stakeStartTime = user.stakeStartTime || new Date().toISOString();
       await updateUser(user._id, user);
       await createNotification({
         userId: user._id,
@@ -85,23 +103,41 @@ router.post('/unstake', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Valid amount required' });
     }
 
-    const user = isDatabaseReady() ? await User.findById(req.user._id) : await findUserById(req.user._id);
-    if (amt > user.stakedAmount) {
+    const preUnstakeUser = isDatabaseReady() ? await User.findById(req.user._id) : await findUserById(req.user._id);
+    if (!preUnstakeUser || amt > preUnstakeUser.stakedAmount) {
       return res.status(400).json({ success: false, message: 'Insufficient staked amount' });
     }
 
-    const stakingDays = user.stakeStartTime
-      ? Math.floor((Date.now() - new Date(user.stakeStartTime)) / (1000 * 60 * 60 * 24))
+    const stakingDays = preUnstakeUser.stakeStartTime
+      ? Math.floor((Date.now() - new Date(preUnstakeUser.stakeStartTime)) / (1000 * 60 * 60 * 24))
       : 0;
     const reward = Number((amt * 0.05 * stakingDays / 365).toFixed(4));
 
-    user.stakedAmount -= amt;
-    user.lvtBalance += amt + reward;
-    user.totalRewardsEarned += reward;
-    if (user.stakedAmount === 0) user.stakeStartTime = null;
+    let user;
 
     if (isDatabaseReady()) {
-      await user.save();
+      // Same atomic-guard pattern as /stake — the $gte filter and pipeline update
+      // are evaluated together by the database, closing the stake/unstake race.
+      user = await User.findOneAndUpdate(
+        { _id: req.user._id, stakedAmount: { $gte: amt } },
+        [{
+          $set: {
+            stakedAmount: { $subtract: ['$stakedAmount', amt] },
+            lvtBalance: { $add: ['$lvtBalance', amt + reward] },
+            totalRewardsEarned: { $add: ['$totalRewardsEarned', reward] }
+          }
+        }, {
+          $set: {
+            stakeStartTime: { $cond: [{ $eq: ['$stakedAmount', 0] }, null, '$stakeStartTime'] }
+          }
+        }],
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(400).json({ success: false, message: 'Insufficient staked amount' });
+      }
+
       await Notification.create({
         userId: user._id,
         type: 'stake_update',
@@ -110,6 +146,11 @@ router.post('/unstake', protect, async (req, res) => {
         data: { unstaked: amt, reward, total: user.lvtBalance }
       });
     } else {
+      user = preUnstakeUser;
+      user.stakedAmount -= amt;
+      user.lvtBalance += amt + reward;
+      user.totalRewardsEarned += reward;
+      if (user.stakedAmount === 0) user.stakeStartTime = null;
       await updateUser(user._id, user);
       await createNotification({
         userId: user._id,

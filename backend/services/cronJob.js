@@ -8,6 +8,7 @@ const WillDocument = require('../models/WillDocument');
 const { sendCheckInReminder, sendContactAlert, sendAssetReleasedEmail } = require('./emailService');
 const { recordActivity } = require('../utils/activity');
 const { registerWill } = require('./blockchainService');
+const { generateToken } = require('./encryptionService');
 
 const createNotification = async (userId, type, title, message, data = {}) => {
   try {
@@ -95,10 +96,12 @@ const runDeadManSwitch = async () => {
     for (const user of triggerUsers) {
       const contacts = await Contact.find({ userId: user._id });
       for (const contact of contacts) {
-        await sendContactAlert(contact.email, contact.name, user.name, user._id, contact._id);
+        const token = generateToken();
+        await sendContactAlert(contact.email, contact.name, user.name, user._id, contact._id, token);
         await Contact.findByIdAndUpdate(contact._id, {
           notificationsSent: contact.notificationsSent + 1,
-          lastNotified: new Date()
+          lastNotified: new Date(),
+          verificationToken: token
         });
       }
 

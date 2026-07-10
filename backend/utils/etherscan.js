@@ -11,11 +11,14 @@ function getSepoliaTxUrl(hash) {
 }
 
 /**
- * Verify transaction exists on Sepolia and was successful
+ * Verify transaction exists on Sepolia, was successful, and (optionally) was sent
+ * to/from the expected addresses — prevents replaying an unrelated successful tx
+ * to claim a reward.
  * @param {string} txHash - Transaction hash to verify
+ * @param {{expectedTo?: string, expectedFrom?: string}} [options]
  * @returns {Promise<{exists: boolean, success: boolean, receipt: object|null, error: string|null}>}
  */
-async function verifyTransaction(txHash) {
+async function verifyTransaction(txHash, options = {}) {
   try {
     if (!isValidTxHash(txHash)) {
       return { exists: false, success: false, receipt: null, error: 'Invalid transaction hash format' };
@@ -23,49 +26,68 @@ async function verifyTransaction(txHash) {
 
     const apiKey = process.env.ETHERSCAN_API_KEY;
     if (!apiKey) {
-      console.warn('ETHERSCAN_API_KEY not configured - skipping on-chain verification');
-      return { exists: true, success: true, receipt: null, error: null, warning: 'API key not configured' };
+      // Fail closed: without a way to verify on-chain, never grant an unverified reward.
+      return {
+        exists: false,
+        success: false,
+        receipt: null,
+        error: 'On-chain verification is not configured (ETHERSCAN_API_KEY missing)'
+      };
     }
 
     const url = `${ETHERSCAN_API_URL}?module=transaction&action=gettxreceiptstatus&txhash=${txHash}&apikey=${apiKey}`;
-    
+
     const response = await fetch(url, { timeout: 10000 });
     const data = await response.json();
 
     if (data.status !== '1') {
-      return { 
-        exists: false, 
-        success: false, 
-        receipt: null, 
-        error: data.message || 'Transaction not found on Sepolia' 
-      };
-    }
-
-    // Transaction exists and was successful
-    if (data.result?.status === '1') {
-      return { 
-        exists: true, 
-        success: true, 
-        receipt: data.result, 
-        error: null 
+      return {
+        exists: false,
+        success: false,
+        receipt: null,
+        error: data.message || 'Transaction not found on Sepolia'
       };
     }
 
     // Transaction reverted/failed
-    return { 
-      exists: true, 
-      success: false, 
-      receipt: data.result, 
-      error: 'Transaction failed on-chain (reverted)' 
+    if (data.result?.status !== '1') {
+      return {
+        exists: true,
+        success: false,
+        receipt: data.result,
+        error: 'Transaction failed on-chain (reverted)'
+      };
+    }
+
+    const { expectedTo, expectedFrom } = options;
+    if (expectedTo || expectedFrom) {
+      const details = await getTransactionDetails(txHash);
+      if (!details) {
+        return { exists: true, success: false, receipt: data.result, error: 'Unable to fetch transaction details for verification' };
+      }
+      if (expectedTo && String(details.to).toLowerCase() !== String(expectedTo).toLowerCase()) {
+        return { exists: true, success: false, receipt: data.result, error: 'Transaction was not sent to the VAULTIS token contract' };
+      }
+      if (expectedFrom && String(details.from).toLowerCase() !== String(expectedFrom).toLowerCase()) {
+        return { exists: true, success: false, receipt: data.result, error: 'Transaction sender does not match your registered wallet' };
+      }
+    }
+
+    // Transaction exists, succeeded, and (if requested) matches expected addresses
+    return {
+      exists: true,
+      success: true,
+      receipt: data.result,
+      error: null
     };
 
   } catch (error) {
     console.error('Etherscan verification error:', error.message);
-    return { 
-      exists: false, 
-      success: false, 
-      receipt: null, 
-      error: error.message 
+    return {
+      exists: false,
+      success: false,
+      receipt: null,
+      error: error.message
     };
   }
 }

@@ -1,4 +1,4 @@
-const PLACEHOLDER_PATTERNS = ['YOUR_', 'replace_with_', 'your_', 'placeholder']
+const PLACEHOLDER_PATTERNS = ['YOUR_', 'replace_with_', 'your_', 'placeholder', '_here', 'change_this', 'CHANGE_ME']
 
 function hasPlaceholder(value = '') {
   return PLACEHOLDER_PATTERNS.some((pattern) => String(value).includes(pattern))
@@ -55,10 +55,24 @@ if (process.env.JWT_SECRET.length < 32) {
   process.exit(1)
 }
 
-// ENCRYPTION_KEY validation is now handled in encryptionService.js
-// to gracefully handle missing or wrong-length keys
-if (process.env.ENCRYPTION_KEY && process.env.ENCRYPTION_KEY.length > 0) {
-  console.log('ENCRYPTION_KEY provided (length: ' + process.env.ENCRYPTION_KEY.length + ')')
+const KNOWN_BAD_ENCRYPTION_KEYS = new Set([
+  'vaultis32charencryptionkey123456' // previously hardcoded fallback — never trust it as a real secret
+])
+
+if (process.env.ENCRYPTION_KEY.length < 16 ||
+    hasPlaceholder(process.env.ENCRYPTION_KEY) ||
+    KNOWN_BAD_ENCRYPTION_KEYS.has(process.env.ENCRYPTION_KEY)) {
+  console.error('ENCRYPTION_KEY is missing, a placeholder, or too short (minimum 16 characters). Generate one with: openssl rand -hex 32')
+  process.exit(1)
+}
+
+if (process.env.AWS_S3_ENABLED === 'true') {
+  const requiredS3Vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION', 'AWS_S3_BUCKET']
+  const missingS3 = requiredS3Vars.filter((key) => !process.env[key] || hasPlaceholder(process.env[key]))
+  if (missingS3.length > 0) {
+    console.error('AWS_S3_ENABLED is true but missing/placeholder S3 config:', missingS3.join(', '))
+    process.exit(1)
+  }
 }
 
 console.log('Environment variables validated')

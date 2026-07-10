@@ -243,6 +243,8 @@ router.get('/history', protect, async (req, res) => {
   }
 });
 
+const CHECKIN_REWARD = 10; // Must match CHECKIN_REWARD in LVTToken.sol
+
 router.post('/save-tx', protect, async (req, res) => {
   try {
     const {
@@ -250,7 +252,6 @@ router.post('/save-tx', protect, async (req, res) => {
       blockNumber = 0,
       network = 'Sepolia Testnet',
       method = 'checkInAndEarn',
-      lvtRewarded = 10,
       timestamp,
       status = 'confirmed',
       etherscanUrl,
@@ -265,11 +266,26 @@ router.post('/save-tx', protect, async (req, res) => {
     }
 
     const normalizedStatus = status === 'confirmed' ? 'confirmed' : 'pending';
+    // Reward amount is never trusted from the client — it always matches the contract constant.
+    const lvtRewarded = normalizedStatus === 'confirmed' ? CHECKIN_REWARD : 0;
 
     // Verify transaction on-chain if marked as confirmed
     if (normalizedStatus === 'confirmed') {
-      const verification = await verifyTransaction(txHash);
-      
+      if (isDatabaseReady()) {
+        const alreadyRecorded = await CheckIn.findOne({ txHash, status: 'confirmed' });
+        if (alreadyRecorded) {
+          return res.status(409).json({
+            success: false,
+            message: 'This transaction has already been recorded.'
+          });
+        }
+      }
+
+      const verification = await verifyTransaction(txHash, {
+        expectedTo: process.env.VAULTIS_TOKEN_ADDRESS,
+        expectedFrom: req.user.walletAddress || req.user.ethereumAddress || undefined
+      });
+
       if (!verification.exists) {
         return res.status(400).json({
           success: false,

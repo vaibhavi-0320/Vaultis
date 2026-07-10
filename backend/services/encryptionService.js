@@ -2,23 +2,16 @@ const crypto = require('crypto');
 
 function getKeyBuffer() {
   const rawKey = process.env.ENCRYPTION_KEY || '';
-  
-  let ENCRYPTION_KEY;
-  
-  if (rawKey.length === 32) {
-    ENCRYPTION_KEY = rawKey;
-  } else if (rawKey.length > 32) {
-    ENCRYPTION_KEY = rawKey.slice(0, 32);
-    console.warn('⚠️  ENCRYPTION_KEY truncated to 32 chars');
-  } else if (rawKey.length > 0) {
-    ENCRYPTION_KEY = rawKey.padEnd(32, '0');
-    console.warn('⚠️  ENCRYPTION_KEY padded to 32 chars');
-  } else {
-    ENCRYPTION_KEY = 'vaultis32charencryptionkey123456';
-    console.warn('⚠️  ENCRYPTION_KEY missing — using default');
+
+  // No fallback: a missing/placeholder key must fail loudly (validateEnv.js already
+  // refuses to boot without one) rather than silently encrypting with a key baked into source.
+  if (!rawKey) {
+    throw new Error('ENCRYPTION_KEY is not configured. Refusing to encrypt/decrypt with no key.');
   }
-  
-  return crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+
+  // The raw string is hashed to derive a 32-byte AES-256 key, so any non-empty
+  // secret of sufficient length is safe input regardless of its literal length.
+  return crypto.createHash('sha256').update(rawKey).digest();
 }
 
 const encrypt = (text) => {

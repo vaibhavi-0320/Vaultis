@@ -8,7 +8,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
 const { connectDB, getDatabaseStatus, isDatabaseReady } = require('./config/db');
 const { init: initBlockchain, getBlockchainStatus } = require('./services/blockchainService');
 const { getEventListenerStatus, startEventListener } = require('./services/eventListener');
@@ -52,12 +51,13 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Check-in rate limiter — disabled for demo (unlimited check-ins allowed)
-// Re-enable and set max: 5 for production
+// Check-in rate limiter. Set CHECKIN_DEMO_MODE=true to allow unlimited check-ins
+// for a live demo; defaults to a real limit otherwise.
 const checkInLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 9999,
-  skip: () => true
+  max: 5,
+  skip: () => process.env.CHECKIN_DEMO_MODE === 'true',
+  message: { success: false, message: 'Too many check-ins, slow down.' }
 });
 
 const allowedOrigins = [
@@ -91,7 +91,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(mongoSanitize());
-app.use(xss());
 
 app.get('/api/health', (req, res) => {
   const databaseStatus = getDatabaseStatus();
